@@ -5,7 +5,7 @@ function LandingPg() {
     <div>
     
         <Headers/>
-        <p>Landingpg</p>
+        <p>Landingp g</p>
     </div>
   )
 }
