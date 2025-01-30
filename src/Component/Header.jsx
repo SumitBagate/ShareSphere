@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'  // Removed Router import a
 
 const navigation = [
   { name: 'Dashboard', href: '/', current: true },
-  { name: 'Upload', href: '/upload', current: false },
+  { name: 'Upload', href: '/LandingPg', current: false },
   { name: 'Calendar', href: '/calendar', current: false },
 ]
 
@@ -81,12 +81,13 @@ export default function Header() {
                 className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 ring-1 shadow-lg ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
               >
                 <MenuItem>
-                  <a
+                  <Link
+                  to="/profile"  // Replaced <a> with <link>
                     href="#"
                     className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
                   >
                     Your Profile
-                  </a>
+                  </Link>
                 </MenuItem>
                 <MenuItem>
                   <a
