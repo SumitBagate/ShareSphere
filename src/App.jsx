@@ -1,35 +1,28 @@
-import { useState } from 'react'
-import './App.css'
-import Header from './Component/Header'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Footer from './Component/Footer'
-import Profile from './Component/Profile'
-
-import Landingpg from './Component/LandingPg'
+import React from 'react';
+import './App.css';
+import Header from './Component/Header';
+import Footer from './Component/Footer';
+import Profile from './Component/Profile';
+import LandingPg from './Component/LandingPg';
+import Login from './Component/Login';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './Auth';  // Import your AuthProvider here
 
 function App() {
-  const [count, setCount] = useState(0)
-  const showFooter = true;
   return (
-    <Router>
-      <Header />
-      
-      <Routes>
-       
-        <Route path="/" element={<div>Home Page</div>} />
-        <Route path="/profile" element={<Profile />} />
-     
-        <Route path="/about" element={<div>About Page</div>} />
-
-        <Route path="/landingPg" element={<Landingpg   showFooter={false}  />} />   
-
-      </Routes>
-   
+    <Router> {/* Wrap the entire app inside Router */}
+      <AuthProvider> {/* Wrap AuthProvider inside Router */}
+        <Header />
+        <Routes>
+          <Route path="/" element={<LandingPg />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/about" element={<div>About Page</div>} />
+        </Routes>
+        <Footer />
+      </AuthProvider>
     </Router>
-     
-
-
-  )
+  );
 }
 
-export default App
+export default App;
