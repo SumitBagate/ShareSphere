@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import Header from './Component/Header';
 import Footer from './Component/Footer';
-import Profile from './Component/Profile';
+import Profile from './Component/profile';
 import LandingPg from './Component/LandingPg';
 import Register from './Component/Register';
 import Login from './Component/Login';
