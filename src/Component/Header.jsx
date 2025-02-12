@@ -5,7 +5,7 @@ import { useContext } from 'react'
 import { AuthContext } from '../Auth'  // Import AuthContext to check login status
 
 const navigation = [
-  { name: 'Dashboard', href: '/', current: true },
+  { name: 'Dashboard', href: '/Dashboard', current: false },
   { name: 'Upload', href: '/LandingPg', current: false },
   { name: 'Calendar', href: '/calendar', current: false },
 ]
@@ -41,11 +41,9 @@ export default function Header() {
           </div>
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
-              />
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-orange-500 to-red-600 text-transparent bg-clip-text">
+          ShareSphere
+        </h1>
             </div>
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
