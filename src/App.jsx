@@ -9,6 +9,8 @@ import Login from './Component/Login';
 import Dashboard from './Component/Dashboard';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './Auth';
+import Upload from './Component/uploads';
+import FileList from './Component/FileList';
 
 function App() {
   return (
@@ -36,9 +38,11 @@ function MainContent() {
           <Route path="/" element={<LandingPg />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/uploads" element={<Upload />} />
           <Route path="/register" element={<Register />} />
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/about" element={<div>About Page</div>} />
+          <Route path="/FileList" element={<FileList />} />
         </Routes>
       </main>
 
