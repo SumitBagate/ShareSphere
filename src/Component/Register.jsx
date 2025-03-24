@@ -1,0 +1,74 @@
+import { useState, useContext } from "react";
+import { AuthContext } from "../Auth"; // Import AuthContext for authentication
+import { Link } from "react-router-dom";
+import { fetchSignInMethodsForEmail } from "firebase/auth"; // Firebase function to check sign-in methods
+import { auth } from "../firebaseConfig"; // Import Firebase auth instance
+
+const Register = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { registerWithEmail } = useContext(AuthContext); // Access register function
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+
+    try {
+      // Check what sign-in methods are associated with this email
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (signInMethods.includes("google.com")) {
+        setErrorMessage("This email is linked to a Google account. Please use Google Sign-In.");
+        return;
+      }
+
+      // Proceed with email/password registration if it's not a Google account
+      await registerWithEmail(email, password);
+      alert("Account created successfully! You can now log in.");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Sign Up</h2>
+
+        {errorMessage && <p className="text-red-500 text-sm text-center">{errorMessage}</p>}
+
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
+
+          <button type="submit" className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+            Sign Up
+          </button>
+        </form>
+
+        <p className="text-center text-gray-600 mt-4">
+          Already have an account? 
+          <Link to="/login" className="text-blue-500 hover:underline ml-2">Log In</Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Register;

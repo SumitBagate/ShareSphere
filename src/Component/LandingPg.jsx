@@ -15,8 +15,8 @@ export default function LandingPg({showFooter}) {
           <Link
             to="/register"
             className="px-5 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600"
-          >
-            Get Started
+          > 
+           Get Started
           </Link>
           <Link
             to="/login"
