@@ -1,0 +1,14 @@
+[33m42699ac[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m remove backend models and server files to streamline project structure
+[33m9d7e9cf[m add file upload functionality with Firebase integration and update User and File models
+[33m10515a7[m[33m ([m[1;31morigin/main[m[33m)[m remove unused notification button from Header component
+[33m00ac715[m add backend file upload functionality with API endpoints and file model
+[33m90522d6[m add Vercel configuration for URL rewrites to serve index.html
+[33m2af2bc9[m fix import case for Profile component in App.jsx
+[33m34db400[m add Register component; update routing and enhance Dashboard UI with new sections
+[33mf53dd6b[m add Dashboard component; enhance Login UI with improved styling and layout
+[33m8aa3755[m add Firebase authentication; implement login functionality and context provider
+[33mfe71c74[m add footer and profile components; update routes in App and Header
+[33m80c26d3[m add
+[33m1211148[m new
+[33mf02967a[m added navabar
+[33m73a5744[m added navbar
