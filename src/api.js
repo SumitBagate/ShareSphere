@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://sharespherebackend.onrender.com";
+const API_URL = "https://sharespherebackend.onrender.com/api"; // ✅ Added `/api`
 
 // Configure axios instance
 const api = axios.create({
@@ -23,7 +23,6 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(response => response, error => {
     if (error.response) {
         console.error('API Error:', error.response.status, error.response.data);
-        // Handle 404 specifically
         if (error.response.status === 404) {
             error.message = "File not found on server";
         }
@@ -42,7 +41,7 @@ export const uploadFile = async (file, onUploadProgress) => {
     formData.append("file", file);
 
     try {
-        const response = await api.post("/upload", formData, {
+        const response = await api.post("/upload", formData, { // ✅ `/api/upload`
             headers: { "Content-Type": "multipart/form-data" },
             onUploadProgress
         });
@@ -56,7 +55,7 @@ export const uploadFile = async (file, onUploadProgress) => {
 // Get Files Function
 export const getFiles = async () => {
     try {
-        const response = await api.get("/files");
+        const response = await api.get("/files"); // ✅ `/api/files`
         return response.data;
     } catch (error) {
         console.error("Error fetching files:", error);
@@ -67,14 +66,14 @@ export const getFiles = async () => {
 // Enhanced Download File Function
 export const downloadFile = async (fileId, filename, onDownloadProgress) => {
     try {
-        // First verify file exists
-        const fileInfo = await api.get(`/files/${fileId}`);
+        // Verify file exists
+        const fileInfo = await api.get(`/files/${fileId}`); // ✅ `/api/files/:id`
         if (!fileInfo.data) {
             throw new Error("File not found");
         }
 
-        // Then download the file
-        const response = await api.get(`/download/${fileId}`, {
+        // Download the file
+        const response = await api.get(`/download/${fileId}`, { // ✅ `/api/download/:id`
             responseType: 'blob',
             onDownloadProgress: progressEvent => {
                 if (onDownloadProgress && progressEvent.lengthComputable) {
@@ -94,13 +93,13 @@ export const downloadFile = async (fileId, filename, onDownloadProgress) => {
         const link = document.createElement('a');
         link.href = blobUrl;
         link.setAttribute('download', filename || fileInfo.data.filename || `file-${fileId}`);
-        
-        // Different handling for iOS
+
+        // Handle iOS separately
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
         }
-        
+
         document.body.appendChild(link);
         link.click();
 
