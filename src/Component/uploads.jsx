@@ -22,11 +22,8 @@ const Upload = () => {
         try {
             await uploadFile(file);
             alert("Upload Successful!");
-<<<<<<< HEAD
-            fetchFiles();  // Refresh the file list
-=======
-            fetchFiles(); // Refresh the file list
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
+
+            fetchFiles(); 
         } catch (err) {
             setError("Failed to upload file");
             console.error(err);

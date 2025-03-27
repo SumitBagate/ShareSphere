@@ -1,71 +1,52 @@
 import { useState, useEffect } from "react";
-import { getFiles, downloadFile } from "../api";
+import { getFiles, downloadFile, deleteFile } from "../api";
+import noImage from "/img.png"; // Fallback image
 
 const FileList = () => {
     const [files, setFiles] = useState([]);
+    const [previewUrl, setPreviewUrl] = useState(null); // For file preview modal
     const [downloadingId, setDownloadingId] = useState(null);
     const [downloadProgress, setDownloadProgress] = useState({});
     const [error, setError] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
+        const fetchFiles = async () => {
+            setLoading(true);
+            try {
+                const res = await getFiles();
+                if (isMounted) setFiles(Array.isArray(res) ? res : []);
+            } catch (error) {
+                if (isMounted) setError("Failed to load files. Please try again.");
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
         fetchFiles();
-<<<<<<< HEAD
-    }, [retryCount]); // Retry when retryCount changes
-=======
-    }, [retryCount]);
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
+        return () => { isMounted = false; };
+    }, []);
 
-    const fetchFiles = async () => {
-        try {
-            const res = await getFiles();
-            setFiles(Array.isArray(res) ? res : []);
-            setError(null);
-        } catch (error) {
-            console.error("Error fetching files:", error);
-            setError("Failed to load files. Please try again.");
-            setFiles([]);
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(null), 3000);
+            return () => clearTimeout(timer);
         }
+    }, [error]);
+
+    const handlePreview = (file) => {
+        setPreviewUrl(`https://sharespherebackend.onrender.com/file/${file._id}`);
     };
 
     const handleDownload = async (fileId, filename) => {
         setDownloadingId(fileId);
-<<<<<<< HEAD
-        setDownloadProgress(prev => ({ ...prev, [fileId]: 0 }));
-        setError(null);
-
-        try {
-            const result = await downloadFile(
-                fileId,
-                filename,
-                (progress) => {
-                    setDownloadProgress(prev => ({ ...prev, [fileId]: progress }));
-                }
-            );
-
-            if (!result.success) {
-                throw new Error(result.message || "Download failed");
-            }
-        } catch (error) {
-            console.error("Download error:", error);
-            setError(error.message || "Failed to download file");
-        } finally {
-            setDownloadingId(null);
-            // Keep progress visible briefly after completion
-            setTimeout(() => {
-                setDownloadProgress(prev => {
-=======
         setDownloadProgress((prev) => ({ ...prev, [fileId]: 0 }));
         setError(null);
 
         try {
-            await downloadFile(
-                fileId,
-                filename,
-                (progress) => {
-                    setDownloadProgress((prev) => ({ ...prev, [fileId]: progress }));
-                }
-            );
+            await downloadFile(fileId, filename, (progress) => {
+                setDownloadProgress((prev) => ({ ...prev, [fileId]: progress }));
+            });
         } catch (error) {
             console.error("Download error:", error);
             setError("Failed to download file");
@@ -73,7 +54,6 @@ const FileList = () => {
             setDownloadingId(null);
             setTimeout(() => {
                 setDownloadProgress((prev) => {
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
                     const newProgress = { ...prev };
                     delete newProgress[fileId];
                     return newProgress;
@@ -82,12 +62,18 @@ const FileList = () => {
         }
     };
 
-    const handleRetry = () => {
-<<<<<<< HEAD
-        setRetryCount(prev => prev + 1);
-=======
-        setRetryCount((prev) => prev + 1);
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
+    const handleDelete = async (fileId) => {
+        if (!window.confirm("Are you sure you want to delete this file?")) return;
+
+        setError(null);
+
+        try {
+            await deleteFile(fileId);
+            setFiles((prevFiles) => prevFiles.filter((file) => file._id !== fileId));
+        } catch (error) {
+            console.error("Delete error:", error);
+            setError("Failed to delete file. Please try again.");
+        }
     };
 
     return (
@@ -95,154 +81,98 @@ const FileList = () => {
             <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-3xl font-bold text-gray-700">Uploaded Files</h2>
-<<<<<<< HEAD
-                    <button 
-=======
-                    <button
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
-                        onClick={handleRetry}
-                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold transition"
-                    >
-                        Refresh List
-                    </button>
                 </div>
 
                 {error && (
                     <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg flex justify-between items-center">
                         <span>{error}</span>
-<<<<<<< HEAD
-                        <button 
-=======
-                        <button
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
-                            onClick={handleRetry}
-                            className="px-3 py-1 bg-red-200 hover:bg-red-300 rounded text-sm font-medium"
-                        >
-                            Retry
-                        </button>
                     </div>
                 )}
 
-                {files.length > 0 ? (
+                {loading ? (
+                    <div className="text-center py-12 text-gray-500">Loading files...</div>
+                ) : files.length > 0 ? (
                     <ul className="mt-4 space-y-3 w-full">
                         {files.map((file) => (
-<<<<<<< HEAD
-                            <li 
-                                key={file._id} 
-=======
                             <li
                                 key={file._id}
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
                                 className="bg-gray-50 hover:bg-gray-100 p-4 rounded-lg flex items-center justify-between shadow-sm transition-all"
                             >
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                     {file.contentType?.startsWith("image/") ? (
-                                        <div className="relative">
-<<<<<<< HEAD
-                                            <img 
-                                                src={`http://localhost:5000/api/${file.url}`} 
-                                                alt={file.filename} 
-                                                className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23EEE'/%3E%3Ctext x='50%' y='50%' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23AAA'%3EImage%3C/text%3E%3C/svg%3E";
-                                                }}
-                                            />
-                                            {file.contentType.startsWith("image/") && (
-                                                <span className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                                                    {file.contentType.split('/')[1]}
-                                                </span>
-                                            )}
-=======
-                                            <img
-                                                src={`https://sharespherebackend.onrender.com/file/${file._id}`}
-                                                alt={file.filename}
-                                                className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = "https://via.placeholder.com/64?text=No+Image";
-                                                }}
-                                            />
-                                            <span className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                                                {file.contentType.split("/")[1]}
-                                            </span>
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
-                                        </div>
+                                        <img
+                                            src={`https://sharespherebackend.onrender.com/file/${file._id}`}
+                                            alt={file.filename}
+                                            className="w-16 h-16 object-cover rounded-lg border border-gray-300 cursor-pointer"
+                                            onClick={() => handlePreview(file)}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = noImage;
+                                            }}
+                                        />
+                                    ) : file.contentType === "application/pdf" ? (
+                                        <a href={`https://sharespherebackend.onrender.com/file/${file._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                            Open PDF
+                                        </a>
                                     ) : (
                                         <div className="min-w-0">
                                             <p className="text-lg font-medium truncate">{file.filename}</p>
                                             <p className="text-sm text-gray-500">
-<<<<<<< HEAD
-                                                {file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'Size unknown'} • 
-                                                {file.contentType || 'Unknown type'}
-=======
-                                                {file.size ? `${(file.size / 1024).toFixed(1)} KB` : "Size unknown"} •{" "}
-                                                {file.contentType || "Unknown type"}
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
+                                                {file.size ? `${(file.size / 1024).toFixed(1)} KB` : "Size unknown"} • {file.contentType || "Unknown type"}
                                             </p>
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex flex-col items-end w-40">
                                     <button
+                                        onClick={() => handlePreview(file)}
+                                        className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold mb-2"
+                                    >
+                                        Preview
+                                    </button>
+                                    <button
                                         onClick={() => handleDownload(file._id, file.filename)}
                                         disabled={downloadingId === file._id}
                                         className={`px-4 py-2 rounded-lg transition text-sm font-semibold w-full ${
-<<<<<<< HEAD
-                                            downloadingId === file._id 
-                                                ? "bg-blue-400 cursor-not-allowed" 
-                                                : "bg-blue-600 hover:bg-blue-700 text-white"
+                                            downloadingId === file._id ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
                                         }`}
                                     >
-                                        {downloadingId === file._id 
-                                            ? `${downloadProgress[file._id] || 0}%` 
-                                            : "Download"}
+                                        {downloadingId === file._id ? <span className="animate-spin">⏳</span> : "Download"}
                                     </button>
-                                    {downloadingId === file._id && (
-                                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                            <div 
-                                                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300" 
-=======
-                                            downloadingId === file._id
-                                                ? "bg-blue-400 cursor-not-allowed"
-                                                : "bg-blue-600 hover:bg-blue-700 text-white"
-                                        }`}
+                                    <button
+                                        onClick={() => handleDelete(file._id)}
+                                        className="px-4 py-2 mt-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold"
+                                        aria-label="Delete file"
                                     >
-                                        {downloadingId === file._id ? `${downloadProgress[file._id] || 0}%` : "Download"}
+                                        Delete
                                     </button>
-                                    {downloadingId === file._id && (
-                                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                            <div
-                                                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
-                                                style={{ width: `${downloadProgress[file._id] || 0}%` }}
-                                            ></div>
-                                        </div>
-                                    )}
                                 </div>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <div className="text-center py-12">
-<<<<<<< HEAD
-                        <p className="text-gray-500 text-lg mb-4">
-                            {error ? "Couldn't load files" : "No files uploaded yet"}
-                        </p>
-=======
-                        <p className="text-gray-500 text-lg mb-4">{error ? "Couldn't load files" : "No files uploaded yet"}</p>
->>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
-                        {error && (
-                            <button
-                                onClick={handleRetry}
-                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
-                            >
-                                Try Again
-                            </button>
-                        )}
-                    </div>
+                    <div className="text-center py-12 text-gray-500">No files uploaded yet.</div>
                 )}
             </div>
+
+            {/* Modal for preview */}
+            {previewUrl && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+                    <div className="bg-white p-4 rounded-lg shadow-lg max-w-3xl w-full">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold">File Preview</h3>
+                            <button onClick={() => setPreviewUrl(null)} className="text-red-500 font-bold text-lg">✖</button>
+                        </div>
+                        <div className="max-h-[70vh] overflow-auto flex justify-center">
+                            {previewUrl.endsWith(".pdf") ? (
+                                <iframe src={previewUrl} className="w-full h-[500px]"></iframe>
+                            ) : (
+                                <img src={previewUrl} alt="Preview" className="max-w-full max-h-[500px] object-contain"/>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
