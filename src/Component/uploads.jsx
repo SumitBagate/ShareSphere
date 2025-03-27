@@ -22,7 +22,11 @@ const Upload = () => {
         try {
             await uploadFile(file);
             alert("Upload Successful!");
+<<<<<<< HEAD
             fetchFiles();  // Refresh the file list
+=======
+            fetchFiles(); // Refresh the file list
+>>>>>>> 5007beaebce50f3b79be06b860c497eb6f82b883
         } catch (err) {
             setError("Failed to upload file");
             console.error(err);
@@ -72,7 +76,7 @@ const Upload = () => {
                         files.map((file) => (
                             <li key={file._id} className="bg-gray-200 p-2 rounded-lg flex justify-between items-center">
                                 <span className="text-sm truncate">{file.filename}</span>
-                                <a href={`http://localhost:5000/file/${file._id}`} download className="text-blue-600 hover:underline text-sm">
+                                <a href={`https://sharespherebackend.onrender.com/file/${file._id}`} download className="text-blue-600 hover:underline text-sm">
                                     Download
                                 </a>
                             </li>
