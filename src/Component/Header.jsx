@@ -7,7 +7,7 @@ import { AuthContext } from '../Auth'
 const navigation = [
   { name: 'Dashboard', href: '/Dashboard' },
   { name: 'Upload', href: '/uploads' },
-  { name: 'FileList', href: '/FileList' },
+
 ]
 
 function classNames(...classes) {
@@ -80,11 +80,13 @@ export default function Header() {
               >
                 {user ? (
                   <>
+                  
                     <MenuItem>
                       <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Your Profile
                       </Link>
                     </MenuItem>
+
                     <MenuItem>
                       <button
                         onClick={handleLogoutClick}
@@ -92,6 +94,11 @@ export default function Header() {
                       >
                         Sign out
                       </button>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link to="/FileList" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Your uploads
+                      </Link>
                     </MenuItem>
                   </>
                 ) : (

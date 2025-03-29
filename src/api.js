@@ -62,6 +62,28 @@ export const uploadFile = async (file, onUploadProgress) => {
     }
 };
 
+// ✅ Fetch Books Function
+export const fetchBooks = async (query) => {
+    if (!query) return [];
+
+    try {
+        const response = await axios.get(
+            `https://openlibrary.org/search.json?q=${query}`
+        );
+
+        return response.data.docs.slice(0, 10).map((book) => ({
+            title: book.title,
+            author: book.author_name?.join(", ") || "Unknown",
+            cover: book.cover_i
+                ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
+                : "https://placehold.co/150x200?text=No+Cover",
+        }));
+    } catch (error) {
+        console.error("Error fetching books:", error);
+        return [];
+    }
+};
+
 // ✅ Get Files Function
 export const getFiles = async () => {
     try {
@@ -126,10 +148,10 @@ export const downloadFile = async (fileId, filename, onDownloadProgress) => {
     }
 };
 
-// ✅ Get File Preview URL Function (Fixed)
+// ✅ Get File Preview URL Function
 export const previewFile = (fileId, contentType) => {
     const baseUrl = `https://sharespherebackend.onrender.com/file/${fileId}`;
-    
+
     if (contentType?.startsWith("image/")) {
         return baseUrl; // Directly return image URL
     } else if (contentType === "application/pdf") {
@@ -143,7 +165,8 @@ export const previewFile = (fileId, contentType) => {
 export const deleteFile = async (fileId) => {
     try {
         const response = await api.delete(`/files/${fileId}`);
-        return response.data || { success: false, message: "No response data" };
+        return response.data || { success: false, message: "No response data" };    
+        
     } catch (error) {
         console.error("Error deleting file:", error);
         throw new Error(error.response?.data?.message || "Failed to delete file.");

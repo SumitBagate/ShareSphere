@@ -7,6 +7,7 @@ import LandingPg from './Component/LandingPg';
 import Register from './Component/Register';
 import Login from './Component/Login';
 import Dashboard from './Component/Dashboard';
+
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './Auth';
 import Upload from './Component/uploads';

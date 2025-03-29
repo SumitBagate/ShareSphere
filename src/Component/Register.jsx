@@ -8,27 +8,47 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false); // State for loading indicator
+
   const { registerWithEmail } = useContext(AuthContext); // Access register function
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setLoading(true); // Start loading
 
     try {
-      // Check what sign-in methods are associated with this email
+      // Check existing sign-in methods for the email
       const signInMethods = await fetchSignInMethodsForEmail(auth, email);
 
       if (signInMethods.includes("google.com")) {
-        setErrorMessage("This email is linked to a Google account. Please use Google Sign-In.");
+        setErrorMessage(
+          "This email is linked to a Google account. Please use Google Sign-In."
+        );
+        setLoading(false);
         return;
       }
 
-      // Proceed with email/password registration if it's not a Google account
+      // Proceed with email/password registration if no conflict
       await registerWithEmail(email, password);
       alert("Account created successfully! You can now log in.");
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(getFriendlyErrorMessage(error.code)); // Handle Firebase errors
     }
+
+    setLoading(false); // Stop loading
+  };
+
+  // 🔹 Convert Firebase error codes to user-friendly messages
+  const getFriendlyErrorMessage = (errorCode) => {
+    const errorMessages = {
+      "auth/email-already-in-use": "This email is already in use. Try logging in instead.",
+      "auth/weak-password": "Password should be at least 6 characters.",
+      "auth/invalid-email": "Invalid email format. Please enter a valid email.",
+      "auth/network-request-failed": "Network error. Check your internet connection.",
+      default: "Something went wrong. Please try again.",
+    };
+    return errorMessages[errorCode] || errorMessages.default;
   };
 
   return (
@@ -57,8 +77,16 @@ const Register = () => {
             className="w-full px-4 py-2 border rounded-md"
           />
 
-          <button type="submit" className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-            Sign Up
+          <button
+            type="submit"
+            className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex justify-center items-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
 
