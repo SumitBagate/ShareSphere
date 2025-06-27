@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signOut,
+
   EmailAuthProvider,
   linkWithCredential,
   fetchSignInMethodsForEmail,
@@ -32,10 +33,19 @@ export const AuthProvider = ({ children }) => {
         setEmailVerified(false);
       }
       setLoading(false);
-    });
+     });
+
 
     return () => unsubscribe();
   }, []);
+
+  const getIdToken = async () => {
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken();
+    }
+    return null;
+  };
+
 
   // ✅ Register with Email + Send Verification Email
   const registerWithEmail = async (email, password) => {
@@ -43,7 +53,9 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
       setUser(newUser);
-
+      const token = await newUser.getIdToken();
+      localStorage.setItem("authToken", token);
+      
       // Send email verification
       await sendEmailVerification(newUser);
       alert("Verification email sent! Please check your inbox.");
@@ -67,6 +79,8 @@ export const AuthProvider = ({ children }) => {
         alert("Please verify your email before logging in.");
         return;
       }
+      const token = await loggedInUser.getIdToken();
+      localStorage.setItem("authToken", token); 
 
       setUser(loggedInUser);
       navigate("/profile");
@@ -92,12 +106,16 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem("authToken");
       setUser(null);
       navigate("/");
     } catch (error) {
       console.error("Sign out error:", error.code, error.message);
     }
   };
+
+  //login with Google
+  // ✅ Google Sign-In
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -113,7 +131,8 @@ export const AuthProvider = ({ children }) => {
         await linkWithCredential(auth.currentUser, credential);
         console.log("Google account linked successfully!");
       }
-  
+      const token = await googleUser.getIdToken();
+      localStorage.setItem("authToken", token); // Store token in local storage
       setUser(googleUser);
       navigate("/profile");
     } catch (error) {
@@ -132,6 +151,7 @@ export const AuthProvider = ({ children }) => {
       loginWithEmail,
       registerWithEmail,
       resendVerificationEmail,
+      getIdToken,
       logout,
     }}>
       {children}

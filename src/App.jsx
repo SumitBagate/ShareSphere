@@ -7,13 +7,33 @@ import LandingPg from './Component/LandingPg';
 import Register from './Component/Register';
 import Login from './Component/Login';
 import Dashboard from './Component/Dashboard';
-
+import AdminPanel from './Component/AdminPannel';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './Auth';
 import Upload from './Component/uploads';
 import FileList from './Component/FileList';
+import ProtectedRoute from "../src/Component/ProtectRoutes";
+import { auth } from "./firebaseConfig"; // adjust path as needed
+import { onAuthStateChanged } from "firebase/auth";
+import  { useEffect } from 'react';
+
+
 
 function App() {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        localStorage.setItem("authToken", token);
+        console.log("Auth token set in localStorage");
+      } else {
+        localStorage.removeItem("authToken");
+        console.log("User signed out — authToken removed");
+      }
+    });
+        // Cleanup listener on unmount
+        return () => unsubscribe();
+      }, [])
   return (
     <Router>
       <AuthProvider>
@@ -39,11 +59,17 @@ function MainContent() {
           <Route path="/" element={<LandingPg />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/uploads" element={<Upload />} />
           <Route path="/register" element={<Register />} />
+          
+          <Route element={<ProtectedRoute />}>
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/about" element={<div>About Page</div>} />
+          <Route path="/uploads" element={<Upload />} />      
           <Route path="/FileList" element={<FileList />} />
+          <Route path="/Admin" element={<AdminPanel />} />
+        </Route>
+        <Route Path="*" element={<LandingPg />} />
+      
         </Routes>
       </main>
 

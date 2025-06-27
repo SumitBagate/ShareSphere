@@ -1,12 +1,32 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, Star } from 'lucide-react';
-import BookSearch from "./BookSearch"; 
 import  FileCard from "../Component/uploadedFilecard"; // Import FileCard component
-
-
+import { auth } from '../firebaseConfig'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { onAuthStateChanged } from "firebase/auth";
+ // Ensure correct Firebase import
 
  function Dashboard() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (!currentUser) {
+            navigate("/login"); // Redirect to login if not authenticated
+        } else {
+            setUser(currentUser);
+        }
+    });
+
+    return () => unsubscribe(); // Cleanup function
+  }, [navigate]);
+
+  if (!user) {
+      return null; // Prevent UI flash before redirect
+  }
   return (
 
     <div className="min-h-screen bg-gray-100 p-6">
@@ -49,11 +69,10 @@ import  FileCard from "../Component/uploadedFilecard"; // Import FileCard compon
     <div>
 
         <FileCard /> {/* Include the FileCard component here */}
-    </div>
-      <BookSearch />
-    </div>
+   </div>
 
   </div>
+</div>
 
 
 

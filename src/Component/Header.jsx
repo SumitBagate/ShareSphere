@@ -1,9 +1,11 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon,CogIcon } from '@heroicons/react/24/outline'
 import { Link, useNavigate } from 'react-router-dom'
 import { useContext } from 'react'
 import { AuthContext } from '../Auth' 
-
+import React, { useEffect, useState } from 'react';
+import { getUserCredits } from '../api'
+import AdminPanel from '../Component/AdminPannel'
 const navigation = [
   { name: 'Dashboard', href: '/Dashboard' },
   { name: 'Upload', href: '/uploads' },
@@ -20,6 +22,41 @@ export default function Header() {
 
   const handleLoginClick = () => navigate('/login')
   const handleLogoutClick = () => logout()
+   
+
+  
+  const [credits, setCredits] = useState(null)
+  const [error, setError] = useState('')
+  
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const res = await getUserCredits()
+        setCredits(res.data.credits)
+      } catch (err) {
+        console.error('Error fetching credits:', err)
+        setError('Error loading credits')
+      }
+    }
+
+    if (user) {
+      fetchCredits()
+       // Listen for the credits-updated event
+       const handleCreditsUpdated = () => {
+        fetchCredits()
+      }
+
+      // Add the event listener for credits update
+      window.addEventListener("credits-updated", handleCreditsUpdated)
+
+      // Cleanup listener on component unmount
+      return () => {
+        window.removeEventListener("credits-updated", handleCreditsUpdated)
+      }
+      
+    }
+  }, [user])
+
 
   return (
     <Disclosure as="nav" className="bg-gray-800">
@@ -62,7 +99,25 @@ export default function Header() {
           </div>
 
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-          
+               {/* Small settings icon */}
+               {user && (
+              <button
+              onClick={() => navigate('./Admin')} // Open Admin Panel
+                className="ml-4 p-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-full"
+                title="Admin Panel"
+              >
+                <CogIcon className="h-6 w-6" />
+              </button>
+            )}
+            
+            
+            {/* ✅ Credits Display */}
+            {user && (
+              <div className="text-sm text-white px-3 py-1 bg-green-600 rounded-full shadow-sm">
+                {credits !== null ? `${credits} Credits` : '...'}
+              </div>
+            )}
+
 
             {/* ✅ Profile dropdown */}
             <Menu as="div" className="relative ml-3">
@@ -113,6 +168,7 @@ export default function Header() {
                 )}
               </MenuItems>
             </Menu>
+           
           </div>
         </div>
       </div>

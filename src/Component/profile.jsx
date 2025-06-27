@@ -1,18 +1,30 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState} from "react";
 import { AuthContext } from "../Auth";
 import { useNavigate } from "react-router-dom";
 
+
 const Profile = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout ,getIdToken} = useContext(AuthContext);
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login"); // Redirect if not logged in
-    }
-  }, [user, navigate]);
 
-  if (!user) return null; // Prevents rendering if user is null
+  useEffect(() => {
+    console.log("🟢 Profile useEffect — user:", user, "getIdToken:", typeof getIdToken);
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    getIdToken()
+    .then(t => {
+      console.log("➡️ getIdToken() returned:", t);
+      setToken(t);
+    })
+    .catch(err => console.error("❌ getIdToken() error:", err));
+}, [user, navigate, getIdToken]);
+
+  if (!user) return null;
+   // Prevents rendering if user is null
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">

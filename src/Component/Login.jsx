@@ -15,21 +15,27 @@ const Login = () => {
     e.preventDefault();
     setErrorMessage('');
     try {
-      await loginWithEmail(email, password);
-      navigate('/dashboard'); // Redirect after login
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await loginWithGoogle();
+      const userCredential = await loginWithEmail(email, password);
+      const token = await userCredential.user.getIdToken(); // 🔐 get token
+      localStorage.setItem('authToken', token); // 💾 store token
       navigate('/dashboard');
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
+  
+
+  const handleGoogleLogin = async () => {
+    try {
+      const userCredential = await loginWithGoogle();
+      const token = await userCredential.user.getIdToken();
+      localStorage.setItem('authToken', token); // 🔐 Save token to localStorage
+      navigate('/dashboard');
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+  
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">

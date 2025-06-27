@@ -1,12 +1,22 @@
 import axios from "axios";
 
-const API_URL = "https://sharespherebackend.onrender.com/api";
+// Import Firebase Authentication module if it's not imported already
+import { getIdToken } from "firebase/auth";
+import { auth } from "./firebaseConfig"; // path must be correct
+
+
+// const API_URL = "https://sharespherebackend.onrender.com/api/files";
+const API_URL = import.meta.env.VITE_API_URL ;
+console.log("API_URL from .env:", API_URL);
+
+
 
 // Configure axios instance
 const api = axios.create({
     baseURL: API_URL,
     timeout: 30000, // 30 seconds timeout
 });
+
 
 // ✅ Request Interceptor: Attach Auth Token
 api.interceptors.request.use(
@@ -24,70 +34,109 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ✅ Response Interceptor: Handle API Errors
+
+// Handle API Errors Gracefully
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response) {
-            console.error("API Error:", error.response.status, error.response.data);
-            error.message =
-                error.response.status === 404
-                    ? "File not found on server"
-                    : error.response.data?.message || "An error occurred";
-        } else if (error.request) {
-            console.error("API Error: No response received", error.request);
-            error.message = "No response from server";
-        } else {
-            console.error("API Error:", error.message);
-        }
-        return Promise.reject(error);
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      error.message =
+        error.response.status === 404
+          ? "File not found on server"
+          : error.response.data?.message || "An error occurred";
+    } else if (error.request) {
+      error.message = "No response from server";
     }
+    return Promise.reject(error);
+  }
 );
 
-// ✅ Upload File Function
-export const uploadFile = async (file, onUploadProgress) => {
-    const formData = new FormData();
-    formData.append("file", file);
+// export const handleLikeClick = async (fileId) => {
+//   try {
+//     const token = localStorage.getItem("authToken");
+//     if (!token) {
+//       alert("Please login to like files.");
+//       return;
+//     }
 
+//     setLikingFileId(fileId);
+//     const updatedLikesCount = await handleLike(fileId); // ✅ get accurate count
+
+//     // Update the file in state with new likes count
+//     setFiles((prevFiles) =>
+//       prevFiles.map((file) =>
+//         file._id === fileId ? { ...file, likes: updatedLikesCount } : file
+//       )
+//     );
+//   } catch (err) {
+//     console.error("Failed to like file:", err);
+//   } finally {
+//     setLikingFileId(null);
+//   }
+// };
+
+export const handleLikeClick = async (fileId) => {
     try {
-        const response = await api.post("/upload", formData, {
+
+      const token = localStorage.getItem("authToken");
+      
+      if (!token) {
+        alert("Please login to like files.");
+        return;
+      }
+  
+      const response = await api.post(`/files/like/${fileId}`);
+
+  
+      if (response.data && response.data.likesCount !== undefined) {
+        return response.data.likesCount; // Ensure this is being returned correctly
+      } else {
+        throw new Error("Failed to update likes");
+      }
+    } catch (err) {
+      console.error("Failed to like file:", err);
+      throw err;
+    }
+  };
+  
+  
+
+// ✅ Upload File Function
+export const uploadFile = async (formData, onUploadProgress) => {
+    try {
+        console.log("🔗 Hitting URL:", `${API_URL}/upload`);
+
+        const response = await api.post("/files/upload", formData, {
             headers: { "Content-Type": "multipart/form-data" },
             onUploadProgress,
         });
 
-        return response.data || { success: false, message: "No response data" };
+        return response; // This returns the full Axios response object
     } catch (error) {
         console.error("Error uploading file:", error);
         throw error;
     }
 };
 
-// ✅ Fetch Books Function
-export const fetchBooks = async (query) => {
-    if (!query) return [];
 
-    try {
-        const response = await axios.get(
-            `https://openlibrary.org/search.json?q=${query}`
-        );
 
-        return response.data.docs.slice(0, 10).map((book) => ({
-            title: book.title,
-            author: book.author_name?.join(", ") || "Unknown",
-            cover: book.cover_i
-                ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
-                : "https://placehold.co/150x200?text=No+Cover",
-        }));
-    } catch (error) {
-        console.error("Error fetching books:", error);
-        return [];
-    }
-};
-
-// ✅ Get Files Function
 export const getFiles = async () => {
     try {
-        const response = await api.get("/files");
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            throw new Error("No auth token found.");
+        }
+
+        console.log("Fetching files with token...");
+        const response = await api.get("/files/all", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+           
+        });
+
+        console.log("Fetched files:", response.data);
         return response.data || [];
     } catch (error) {
         console.error("Error fetching files:", error);
@@ -95,10 +144,71 @@ export const getFiles = async () => {
     }
 };
 
+
+// Firebase token
+
+export const getFreshToken = async () => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+  
+    return await getIdToken(user, true); // Force refresh token
+  };
+
+// In your reportIssue function
+export const reportIssue = async (fileId, issueType, details) => {
+    const token = await getFreshToken();
+  
+    return axios.post(
+      `${API_URL}/files/report/${fileId}`, // <-- Include the fileId in the URL
+      { issueType, details }, // Payload
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  };
+  
+
+//get user credits
+
+// api.js
+export const getUserCredits = async () => {
+    const token = await getFreshToken();
+  
+    return axios.get(`${API_URL}/user/credits`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+  
+
+
+//get user uploaded files
+
+export  const getMyUploads = async () => {
+    try {
+      const authToken = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/user/myuploads`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      console.log("API Response:", response.data); // Log response data
+      return response;
+    } catch (error) {
+      console.error("Error fetching files:", error.response || error); // Log detailed error
+      throw error; // Rethrow error so it can be handled in the component
+    }
+  };
+
+
+
 // ✅ Download File Function
 export const downloadFile = async (fileId, filename, onDownloadProgress) => {
-    try {
-        const response = await api.get(`/download/${fileId}`, {
+    try {    console.log("🔗 Hitting URL:", `${API_URL}/files/download/${fileId}`);
+        const response = await api.get(`/files/download/${fileId}`, {
             responseType: "blob",
             onDownloadProgress: (progressEvent) => {
                 if (onDownloadProgress && progressEvent.lengthComputable) {
@@ -148,27 +258,61 @@ export const downloadFile = async (fileId, filename, onDownloadProgress) => {
     }
 };
 
-// ✅ Get File Preview URL Function
-export const previewFile = (fileId, contentType) => {
-    const baseUrl = `https://sharespherebackend.onrender.com/file/${fileId}`;
+// api.js
+const previewCache = new Map();
 
-    if (contentType?.startsWith("image/")) {
-        return baseUrl; // Directly return image URL
-    } else if (contentType === "application/pdf") {
-        return `${baseUrl}#view=Fit`; // Open PDFs in browser
-    } else {
-        return baseUrl; // Other file types (fallback)
-    }
+export const previewFile = async (fileID, contentType) => {
+  // Check if the preview is already in the cache
+  if (previewCache.has(fileID)) {
+    console.log("Returning cached preview for", fileID);
+    return previewCache.get(fileID);
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/files/preview/${fileID}`);
+    const blob = await response.blob();
+    const previewUrl = URL.createObjectURL(blob);
+
+    // Cache the preview
+    previewCache.set(fileID, previewUrl);
+    console.log("Caching preview for", fileID);
+    return previewUrl;
+  } catch (error) {
+    console.error("Error fetching preview:", error);
+    return null; // Return null if the preview cannot be fetched
+  }
 };
+
+  
+
 
 // ✅ Delete File Function
 export const deleteFile = async (fileId) => {
     try {
-        const response = await api.delete(`/files/${fileId}`);
-        return response.data || { success: false, message: "No response data" };    
-        
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem("authToken");
+  
+      if (!token) {
+        throw new Error("No token found. Please log in.");
+      }
+  
+      // Include the token in the Authorization header
+      const response = await axios.delete(`${API_URL}/files/delete/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token here
+        },
+      });
+  
+      return response.data;
     } catch (error) {
-        console.error("Error deleting file:", error);
-        throw new Error(error.response?.data?.message || "Failed to delete file.");
+      console.error("Error deleting file:", error);
+  
+      // Handle error response
+      if (error.response) {
+        throw new Error(error.response.data.error || "Error deleting the file.");
+      } else {
+        throw new Error("Network error or server is down. Please try again later.");
+      }
     }
-};
+  };
+  
