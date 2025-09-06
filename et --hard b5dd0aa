@@ -1,0 +1,34 @@
+[33m572efff[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m Remove old code
+[33mb5dd0aa[m[33m ([m[1;31morigin/main[m[33m)[m Your descriptive commit message
+[33md042a3d[m make like  counting  correction
+[33mcbc412b[m Add email verification component, book search feature, and file upload management; enhance registration with loading state and user-friendly error messages
+[33m80c9485[m Refactor API integration to use axios, add interceptors for authentication and error handling, and implement file upload/download functionalities
+[33m6308a8f[m Added Firebase credentials to .gitignore
+[33m6e468b8[m Added Firebase credentials to .gitignore
+[33mbdf700b[m Updated .gitignore rules
+[33m18a4580[m Removed Firebase credentials and updated .gitignore
+[33m94327b5[m Merge branch 'main' of https://github.com/thunderboltz-18/ShareSphere
+[33m044559e[m add .env file for Firebase configuration; update .gitignore to include environment variables
+[33m78931ae[m Update api.js
+[33m4e9eb40[m Update FileList.jsx
+[33mbd5601a[m Update uploads.jsx
+[33mc51fcf4[m Update api.js
+[33me00ac73[m Update FileList.jsx
+[33mb1d5fb7[m Update uploads.jsx
+[33m69bd91b[m Update api.js
+[33me0889e5[m hi
+[33m3316f8d[m add Register and Dashboard components; enhance UI with improved styling and routing
+[33m5a109c8[m remove backend models and server files to streamline project structure
+[33md9d2035[m add file upload functionality with Firebase integration and update User and File models
+[33m10515a7[m remove unused notification button from Header component
+[33m00ac715[m add backend file upload functionality with API endpoints and file model
+[33m90522d6[m add Vercel configuration for URL rewrites to serve index.html
+[33m2af2bc9[m fix import case for Profile component in App.jsx
+[33m34db400[m add Register component; update routing and enhance Dashboard UI with new sections
+[33mf53dd6b[m add Dashboard component; enhance Login UI with improved styling and layout
+[33m8aa3755[m add Firebase authentication; implement login functionality and context provider
+[33mfe71c74[m add footer and profile components; update routes in App and Header
+[33m80c26d3[m add
+[33m1211148[m new
+[33mf02967a[m added navabar
+[33m73a5744[m added navbar
