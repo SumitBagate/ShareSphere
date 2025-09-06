@@ -13,7 +13,7 @@ console.log("API_URL from .env:", API_URL);
 
 // Configure axios instance
 const api = axios.create({
-    baseURL: API_URL,
+   baseURL: import.meta.env.VITE_API_URL, // ✅ deployed backend
     timeout: 30000, // 30 seconds timeout
 });
 
